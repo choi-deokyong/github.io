@@ -4,247 +4,219 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>교회 차량 배차 시스템</title>
-    <!-- Inter 폰트 로드 -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS CDN을 사용하여 스타일을 적용합니다. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6; /* 회색 배경 */
         }
-        /* 구글 캘린더 아이프레임 반응형 설정 */
+        /* 구글 캘린더 iframe의 크기를 조정하여 모바일에서도 크게 보이도록 합니다. */
         .calendar-container {
-            position: relative;
             width: 100%;
-            padding-bottom: 75%; /* 4:3 비율 유지 */
-            height: 0;
-            overflow: hidden;
-            border-radius: 0.75rem; /* 둥근 모서리 */
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            height: 100vh; /* 화면 높이 전체를 사용 */
+            max-height: 800px; /* 최대 높이 설정 */
+            overflow: auto; /* 내용이 넘칠 경우 스크롤바 생성 */
         }
-        .calendar-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .calendar-iframe {
             width: 100%;
             height: 100%;
             border: 0;
         }
-        /* 커스텀 메시지 박스 스타일 */
-        .message-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 50;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            transition: opacity 0.3s ease-in-out;
-            opacity: 0;
-            pointer-events: none;
-        }
-        .message-box.show {
-            opacity: 1;
-            pointer-events: auto;
+        /* form inputs */
+        .form-input {
+            @apply block w-full mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-    <div class="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8 space-y-8">
+<body class="p-4 md:p-8">
 
-        <!-- 페이지 제목 -->
-        <header class="text-center space-y-2">
-            <h1 class="text-4xl font-bold text-gray-800">교회 차량 배차 시스템</h1>
-            <p class="text-gray-500">차량 사용 가능 여부를 확인하고 신청 양식을 작성해주세요.</p>
-        </header>
+    <div class="max-w-6xl mx-auto space-y-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mt-4">교회 차량 배차 신청</h1>
 
-        <!-- 구글 캘린더 섹션 -->
-        <section class="space-y-4">
-            <h2 class="text-2xl font-semibold text-gray-700">차량 사용 가능 일정</h2>
-            <div class="calendar-container">
-                <!-- 사용자 지정 Google Calendar iframe URL -->
-                <iframe src="https://calendar.google.com/calendar/embed?src=10263285edd19de93d9af3612d15a7c464b99f93d10f306e9a8576cbe181efe4@group.calendar.google.com&ctz=Asia%2FSeoul&mode=month"></iframe>
-            </div>
-        </section>
+        <!-- Google Calendar Display -->
+        <div class="calendar-container rounded-xl shadow-xl overflow-hidden">
+            <iframe
+                src="https://calendar.google.com/calendar/embed?src=10263285edd19de93d9af3612d15a7c464b99f93d10f306e9a8576cbe181efe4@group.calendar.google.com&ctz=Asia%2FSeoul&mode=month"
+                class="calendar-iframe"
+                frameborder="0"
+                scrolling="no"
+                title="Google Calendar"
+            ></iframe>
+        </div>
 
-        <!-- 신청 양식 섹션 -->
-        <section class="space-y-4">
-            <h2 class="text-2xl font-semibold text-gray-700">차량 사용 신청 양식</h2>
-            <form id="vehicle-request-form" class="space-y-6">
-
-                <!-- 1] 신청자 성함 -->
-                <div>
-                    <label for="applicant-name" class="block text-sm font-medium text-gray-700">1] 신청자 성함</label>
-                    <input type="text" id="applicant-name" name="신청자 성함" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                </div>
-
-                <!-- 2] 출발 날짜와 시간 -->
-                <div>
-                    <label for="departure-datetime" class="block text-sm font-medium text-gray-700">2] 출발 날짜와 시간</label>
-                    <input type="datetime-local" id="departure-datetime" name="출발날짜와 시간" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                </div>
-
-                <!-- 3] 도착 날짜와 시간 -->
-                <div>
-                    <label for="arrival-datetime" class="block text-sm font-medium text-gray-700">3] 도착 날짜와 시간</label>
-                    <input type="datetime-local" id="arrival-datetime" name="도착날짜와 시간" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                </div>
-
-                <!-- 4] 몇 명이 가시나요? -->
-                <div>
-                    <label for="number-of-people" class="block text-sm font-medium text-gray-700">4] 몇 명이 가시나요?</label>
-                    <input type="number" id="number-of-people" name="몇명이 가시나요?" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                </div>
-
-                <!-- 5] 어디로 가시나요? -->
-                <div>
-                    <label for="destination" class="block text-sm font-medium text-gray-700">5] 어디로 가시나요?</label>
-                    <input type="text" id="destination" name="어디로 가시나요?" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                </div>
-
-                <!-- 6] 승합차 몇 대가 필요하신가요? -->
-                <div>
-                    <label for="num-vans" class="block text-sm font-medium text-gray-700">6] 승합차 몇 대가 필요하신가요?</label>
-                    <select id="num-vans" name="승합차 몇대로 필요하신가요?" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border bg-white">
-                        <option value="0">0대</option>
-                        <option value="1">1대</option>
-                        <option value="2">2대</option>
-                        <option value="3">3대</option>
-                    </select>
-                </div>
-
-                <!-- 7] 버스가 필요하실까요? -->
-                <div>
-                    <label for="num-buses" class="block text-sm font-medium text-gray-700">7] 버스가 필요하실까요?</label>
-                    <select id="num-buses" name="버스가 필요하실까요?" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border bg-white">
-                        <option value="0">0대</option>
-                        <option value="1">1대</option>
-                        <option value="2">2대</option>
-                    </select>
-                </div>
-
-                <!-- 8] 용도가 어떻게 되시나요? -->
-                <div>
-                    <label for="purpose" class="block text-sm font-medium text-gray-700">8] 용도가 어떻게 되시나요? 예) 시선부수련회</label>
-                    <input type="text" id="purpose" name="용도가 어떻게 되시나요?" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                </div>
-
-                <!-- 안내사항 및 동의 섹션 -->
-                <div class="mt-8 pt-4 border-t border-gray-200">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-2">안내사항 및 동의</h3>
-                    <div class="bg-gray-50 p-4 rounded-md text-gray-600 text-sm space-y-4">
-                        <p>교회승합차 예약 및 배차에 대해 안내해 드리겠습니다.</p>
-                        <p>교회차량은 사용 용도에 따라 **교회지원**과 **사용자 부담**으로 구분합니다.</p>
-                        
-                        <div class="space-y-2 pl-4">
-                            <p><strong>교회지원</strong></p>
-                            <ul class="list-disc pl-4 space-y-1">
-                                <li>회/부서/교구/구역에서 봉사와 교회 공식일정을 위한 목적으로 차량 이용시</li>
-                                <li>차량 유류비, 고속도로 톨게이트 비용 교회에서 지원</li>
-                            </ul>
-                            
-                            <p><strong>사용자 부담</strong></p>
-                            <ul class="list-disc pl-4 space-y-1">
-                                <li>회/부서/교구/구역에서 교회 비공식일정을 위한 목적으로 차량 이용시</li>
-                                <li>차량 유류비, 고속도로 톨게이트 비용 사용자부담</li>
-                            </ul>
-                            <p>※ 교회 공식일정 : 년간/월간 계획 및 교회소식지에 광고된 교회의 각종 행사나 모임을 말함</p>
-                        </div>
-                        
-                        <p>3) 차량 매뉴얼에 의해 교회 공식일정 및 우선순위에 따라 예약 및 배차가 변경될 경우 바로 연락드리도록 하겠습니다.</p>
-                        <p>교회차량관리자 신현구형제(010-7345-2253)</p>
-                        <p>차량배정담당자 (정)윤종식 집사(010-7172-9401)</p>
-                        <p>(부)최상돈 집사(010-4569-0691)</p>
-                        <p>해당사항 확인하신 후 아래 체크박스에 체크하고 제출 버튼을 눌러주시면 신청이 접수됩니다.</p>
+        <!-- Reservation Form -->
+        <div class="bg-white rounded-xl shadow-xl p-6 md:p-10">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">차량 신청 양식</h2>
+            <form id="vehicle-form" action="https://script.google.com/macros/s/AKfycbzpyJY-sVvdfPw1rlM_-HhD0IPFKC9V8zh4JjGrj_dQa1WnLcmxjOvzLJAkKxU7ba7ba7pyg/exec" method="POST">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Applicant Name -->
+                    <div>
+                        <label for="applicantName" class="block text-sm font-medium text-gray-700">1] 신청자 성함</label>
+                        <input type="text" id="applicantName" name="신청자 성함" required class="form-input">
                     </div>
 
-                    <!-- 동의 체크박스 -->
-                    <div class="mt-4 flex items-center">
-                        <input type="checkbox" id="agreement-checkbox" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                        <label for="agreement-checkbox" class="ml-2 block text-sm text-gray-900">
+                    <!-- Departure Date and Time -->
+                    <div>
+                        <label for="departureDateTime" class="block text-sm font-medium text-gray-700">2] 출발 날짜와 시간</label>
+                        <input type="datetime-local" id="departureDateTime" name="출발 날짜와 시간" required class="form-input">
+                    </div>
+
+                    <!-- Arrival Date and Time -->
+                    <div>
+                        <label for="arrivalDateTime" class="block text-sm font-medium text-gray-700">3] 도착 날짜와 시간</label>
+                        <input type="datetime-local" id="arrivalDateTime" name="도착 날짜와 시간" required class="form-input">
+                    </div>
+
+                    <!-- Number of People -->
+                    <div>
+                        <label for="numberOfPeople" class="block text-sm font-medium text-gray-700">4] 몇 명이 가시나요?</label>
+                        <input type="number" id="numberOfPeople" name="몇명이 가시나요" required min="1" class="form-input">
+                    </div>
+
+                    <!-- Destination -->
+                    <div>
+                        <label for="destination" class="block text-sm font-medium text-gray-700">5] 어디로 가시나요?</label>
+                        <input type="text" id="destination" name="어디로 가시나요" required class="form-input">
+                    </div>
+
+                    <!-- Number of Vans -->
+                    <div>
+                        <label for="numberOfVans" class="block text-sm font-medium text-gray-700">6] 승합차 몇 대로 필요하신가요?</label>
+                        <select id="numberOfVans" name="승합차 몇대로 필요하신가요" required class="form-input">
+                            <option value="0">0대</option>
+                            <option value="1">1대</option>
+                            <option value="2">2대</option>
+                            <option value="3">3대</option>
+                        </select>
+                    </div>
+
+                    <!-- Number of Buses -->
+                    <div>
+                        <label for="numberOfBuses" class="block text-sm font-medium text-gray-700">7] 버스가 필요하실까요?</label>
+                        <select id="numberOfBuses" name="버스가 필요하실까요" required class="form-input">
+                            <option value="0">0대</option>
+                            <option value="1">1대</option>
+                            <option value="2">2대</option>
+                        </select>
+                    </div>
+
+                    <!-- Purpose -->
+                    <div>
+                        <label for="purpose" class="block text-sm font-medium text-gray-700">8] 용도가 어떻게 되시나요? 예) 시선부수련회</label>
+                        <input type="text" id="purpose" name="용도가 어떻게 되시나요" required class="form-input">
+                    </div>
+                </div>
+
+                <!-- Guidance and Agreement -->
+                <div class="mt-8 border-t border-gray-200 pt-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">안내사항 및 동의</h3>
+                    <div class="prose prose-sm max-w-none text-gray-600 space-y-4">
+                        <p>교회 승합차 예약 및 배차에 대해 안내해 드리겠습니다.<br>교회 차량은 사용 용도에 따라 <strong>교회지원</strong>과 <strong>사용자 부담</strong>으로 구분합니다.</p>
+                        <p class="pl-4">
+                            <strong>교회지원</strong><br>
+                            회/부서/교구/구역에서 봉사와 교회 공식일정을 위한 목적으로 차량 이용 시<br>
+                            차량 유류비, 고속도로 톨게이트 비용 교회에서 지원
+                        </p>
+                        <p class="pl-4">
+                            <strong>사용자부담</strong><br>
+                            회/부서/교구/구역에서 교회 비공식일정을 위한 목적으로 차량 이용 시<br>
+                            차량 유류비, 고속도로 톨게이트 비용 사용자 부담
+                        </p>
+                        <p class="pl-4 text-sm text-gray-500">
+                            ※ 교회 공식일정: 년간/월간 계획 및 교회 소식지에 광고된 교회의 각종 행사나 모임을 말함
+                        </p>
+                        <p>
+                            차량 매뉴얼에 의해 교회 공식일정 및 우선순위에 따라 예약 및 배차가 변경될 경우 바로 연락드리도록 하겠습니다.
+                        </p>
+                        <p>
+                            교회차량관리자 신현구형제 (010-7345-2253)<br>
+                            차량배정담당자 (정)윤종식 집사 (010-7172-9401)<br>
+                            (부)최상돈 집사 (010-4569-0691)
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center">
+                        <input type="checkbox" id="agreement" name="동의" required class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="agreement" class="ml-2 block text-sm font-medium text-gray-700">
                             위 내용을 확인하였으며, 이에 동의합니다.
                         </label>
                     </div>
                 </div>
 
-                <!-- 신청하기 버튼 -->
-                <div class="mt-6">
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                <!-- Submit Button -->
+                <div class="mt-8 flex justify-center">
+                    <button type="submit" id="submit-btn" class="w-full sm:w-auto px-6 py-3 text-lg font-bold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         신청하기
                     </button>
                 </div>
             </form>
-        </section>
 
+            <!-- Submission Status Message -->
+            <div id="status-message" class="mt-6 text-center text-sm font-medium hidden"></div>
+
+        </div>
     </div>
 
-    <!-- 제출 성공/실패 메시지 박스 (alert 대신 사용) -->
-    <div id="message-box" class="message-box bg-white text-center p-6 rounded-lg shadow-xl hidden">
-        <p id="message-text" class="text-xl font-semibold"></p>
-        <button onclick="closeMessage()" class="mt-4 py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">확인</button>
-    </div>
-    
-    <!-- JavaScript for form submission -->
     <script>
-        // form 요소를 가져옵니다.
-        const form = document.getElementById('vehicle-request-form');
-        const messageBox = document.getElementById('message-box');
-        const messageText = document.getElementById('message-text');
+        // DOMContentLoaded 이벤트 발생 시 JavaScript 코드 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('vehicle-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const statusMessage = document.getElementById('status-message');
 
-        // 메시지 박스를 보여주는 함수
-        function showMessage(message, isSuccess) {
-            messageText.textContent = message;
-            if (isSuccess) {
-                messageBox.classList.add('bg-green-100', 'text-green-800');
-                messageBox.classList.remove('bg-red-100', 'text-red-800');
-            } else {
-                messageBox.classList.add('bg-red-100', 'text-red-800');
-                messageBox.classList.remove('bg-green-100', 'text-green-800');
-            }
-            messageBox.classList.remove('hidden');
-        }
+            // 폼 제출 이벤트를 감지합니다.
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault(); // 기본 폼 제출 동작을 막습니다.
 
-        // 메시지 박스를 닫는 함수
-        function closeMessage() {
-            messageBox.classList.add('hidden');
-        }
-        
-        // 폼 제출 이벤트를 처리합니다.
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // 기본 폼 제출 동작을 막습니다.
-
-            // 폼 데이터를 JSON 객체로 만듭니다.
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-
-            // 체크박스 상태를 추가합니다.
-            data['동의여부'] = formData.get('agreement-checkbox') ? '동의' : '비동의';
-
-            const spreadsheetUrl = 'https://script.google.com/macros/s/AKfycbzpyJY-sVvdfPw1rlM_-HhD0IPFKC9V8zh4JjGrj_dQa1WnLcmxjOvzLJAkKxU7ba7ba7pyg/exec';
-
-            try {
-                // fetch를 사용하여 POST 요청을 보냅니다.
-                const response = await fetch(spreadsheetUrl, {
-                    method: 'POST',
-                    body: JSON.stringify(data), // 데이터를 JSON 문자열로 변환하여 보냅니다.
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-
-                // 응답이 성공적인지 확인합니다.
-                if (response.ok) {
-                    showMessage('신청이 성공적으로 제출되었습니다.', true);
-                    form.reset(); // 폼을 초기화합니다.
-                } else {
-                    showMessage('제출에 실패했습니다. 다시 시도해주세요.', false);
+                // 동의 체크박스가 체크되었는지 확인합니다.
+                const agreementCheckbox = document.getElementById('agreement');
+                if (!agreementCheckbox.checked) {
+                    statusMessage.textContent = '신청을 위해 동의 체크박스에 체크해주세요.';
+                    statusMessage.className = 'mt-6 text-center text-sm font-medium text-red-500';
+                    statusMessage.classList.remove('hidden');
+                    return;
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage('네트워크 오류가 발생했습니다. 제출에 실패했습니다.', false);
-            }
+
+                // 폼 데이터를 가져와서 FormData 객체를 만듭니다.
+                const formData = new FormData(form);
+
+                // 신청하기 버튼과 상태 메시지를 업데이트합니다.
+                submitBtn.disabled = true;
+                submitBtn.textContent = '신청 중...';
+                statusMessage.textContent = '신청 정보를 제출하고 있습니다. 잠시만 기다려주세요...';
+                statusMessage.className = 'mt-6 text-center text-sm font-medium text-blue-600';
+                statusMessage.classList.remove('hidden');
+
+                try {
+                    // Fetch API를 사용하여 구글 Apps Script URL로 데이터를 전송합니다.
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        // 요청이 성공적으로 완료되었을 경우
+                        statusMessage.textContent = '✅ 신청이 성공적으로 접수되었습니다!';
+                        statusMessage.className = 'mt-6 text-center text-sm font-medium text-green-600';
+                        // 폼을 초기화합니다.
+                        form.reset();
+                    } else {
+                        // 요청에 실패했을 경우
+                        const errorText = await response.text();
+                        statusMessage.textContent = `🚨 신청 실패: ${errorText}`;
+                        statusMessage.className = 'mt-6 text-center text-sm font-medium text-red-600';
+                    }
+                } catch (error) {
+                    // 네트워크 오류 등 예외 처리
+                    statusMessage.textContent = `🚨 신청 중 오류가 발생했습니다: ${error.message}`;
+                    statusMessage.className = 'mt-6 text-center text-sm font-medium text-red-600';
+                } finally {
+                    // 제출이 완료되면 버튼 상태를 원래대로 복구합니다.
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '신청하기';
+                }
+            });
         });
     </script>
 </body>
